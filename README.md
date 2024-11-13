@@ -20,7 +20,7 @@ Agent Saloon is an innovative project that orchestrates collaborative book writi
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/agent_saloon.git
+git clone https://github.com/jmcdice/agent_saloon.git
 cd agent_saloon
 ```
 
