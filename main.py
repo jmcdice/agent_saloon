@@ -181,6 +181,12 @@ def main():
             # No sub-sections; treat the chapter itself as a section
             irc_logger.system_message(f"Writing Chapter {chapter_number}: {chapter_title}")
 
+            # print("\nDebug values before creating SectionWriter:")
+            # print(f"title: {title}")
+            # print(f"toc: {toc}")
+            # print(f"chapter_number: {chapter_number}")
+            # print(f"chapter_title: {chapter_title}")
+            
             # Create a SectionWriter instance for the chapter
             section_writer = SectionWriter(
                 book_title=title,

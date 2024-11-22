@@ -34,7 +34,7 @@ class BookManager:
 
     def write_content(self, book_title, filename, content, subdir=None):
         """Write content to a file within the book's directory.
-
+    
         Args:
             book_title (str): The title of the book.
             filename (str): The filename to write to.
@@ -49,13 +49,17 @@ class BookManager:
         else:
             file_path = os.path.join(book_path, filename)
         try:
+            # Remove Consensus markers from content
+            lines = content.splitlines()
+            processed_lines = [line for line in lines if not line.strip().startswith("Consensus:")]
+            content = '\n'.join(processed_lines)
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(content)
             print(f"Written to {file_path}")
         except IOError as e:
             print(f"Error writing to file {file_path}: {e}")
             raise
-
+    
     def read_file(self, book_title, filename, subdir=None):
         """Read content from a file within the book's directory.
 

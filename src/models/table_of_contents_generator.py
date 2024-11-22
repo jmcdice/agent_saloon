@@ -3,7 +3,7 @@
 from src.agents import Agents
 from src.prompts import TOC_PROMPT_ZERO, TOC_PROMPT_GUSTAVE
 from src.config import TOC_GENERATION
-from src.utils.irc_logger import irc_logger  # Ensure correct import path
+from src.utils.irc_logger import irc_logger
 import traceback
 
 class TableOfContentsGenerator:
@@ -19,24 +19,45 @@ class TableOfContentsGenerator:
         self.zero_agent = self.agents.get_zero(TOC_PROMPT_ZERO, self._handoff_to_gustave)
         self.gustave_agent = self.agents.get_gustave(TOC_PROMPT_GUSTAVE, self._handoff_to_zero)
 
-    def _handoff_to_gustave(self, context_variables=None):
+    def _handoff_to_gustave(self):
         return self.gustave_agent
 
-    def _handoff_to_zero(self, context_variables=None):
+    def _handoff_to_zero(self):
         return self.zero_agent
 
     def format_message(self, content):
-        """
-        Formats the message content by removing system messages.
-        System messages start with 'HANDOFF:' or contain 'functions.' calls.
-        """
+        """Formats the message content by removing system messages."""
+        if not isinstance(content, str):
+            content = str(content or "")
         lines = content.split('\n')
         filtered_lines = []
         for line in lines:
             if line.startswith("HANDOFF:") or line.startswith("functions."):
                 continue
             filtered_lines.append(line)
-        return '\n'.join(filtered_lines)
+        return '\n'.join(filtered_lines).strip()
+
+    def _extract_toc(self, content):
+        """Extract the agreed-upon table of contents from content"""
+        if not content:
+            irc_logger.error("No content to extract for Table of Contents.")
+            return
+        if "Table of Contents:" in content:
+            self.toc = content.split("Table of Contents:")[1].strip()
+        else:
+            self.toc = content.strip()
+
+    def _force_consensus(self):
+        """Force consensus with the last proposed table of contents"""
+        for msg in reversed(self.messages):
+            if isinstance(msg, dict):
+                content = msg.get("content", "") or ""
+                if content.strip():
+                    self._extract_toc(content)
+                    irc_logger.info("Forced consensus on the last proposed Table of Contents.")
+                    return
+        self.toc = None
+        irc_logger.warning("No valid Table of Contents found to force consensus.")
 
     def generate(self):
         """Generate a table of contents through agent collaboration"""
@@ -47,53 +68,51 @@ class TableOfContentsGenerator:
 
         self.messages = [initial_message]
         attempt_count = 0
+        max_attempts = TOC_GENERATION.get("max_attempts", 10)
+        max_consecutive_failures = 3
+        consecutive_failures = 0
+        current_agent = self.zero_agent
 
         try:
-            response = self.agents.client.run(
-                agent=self.zero_agent,
-                messages=self.messages,
-                context_variables={"book_title": self.book_title},
-                debug=TOC_GENERATION["debug"]
-            )
-
-            if response is None or response.messages is None:
-                irc_logger.error("Received an invalid response from the agent.")
-                return None
-
-            formatted_content = self.format_message(response.messages[-1].get('content', ''))
-            irc_logger.agent_message(response.agent.name, formatted_content)
-            self.messages.extend(response.messages)
-
-            for _ in range(TOC_GENERATION["max_attempts"]):
+            while attempt_count < max_attempts and consecutive_failures < max_consecutive_failures:
                 attempt_count += 1
 
-                next_agent = self._handoff_to_gustave() if response.agent.name == "Zero" else self._handoff_to_zero()
-
                 response = self.agents.client.run(
-                    agent=next_agent,
+                    agent=current_agent,
                     messages=self.messages,
-                    context_variables=response.context_variables,
-                    debug=TOC_GENERATION["debug"]
+                    context_variables={"book_title": self.book_title},
+                    max_turns=1,
+                    debug=TOC_GENERATION.get("debug", False)
                 )
 
-                if response is None or response.messages is None:
+                if response is None or response.messages is None or not response.messages:
                     irc_logger.error("Received an invalid response from the agent.")
-                    break
+                    consecutive_failures += 1
+                    continue
 
-                formatted_content = self.format_message(response.messages[-1].get('content', ''))
-                irc_logger.agent_message(response.agent.name, formatted_content)
+                last_message = response.messages[-1]
+                content = last_message.get('content', '') or ''
+                formatted_content = self.format_message(content)
+
+                if not formatted_content:
+                    irc_logger.error("Formatted content is empty.")
+                    consecutive_failures += 1
+                    continue
+
+                irc_logger.agent_message(current_agent.name, formatted_content)
                 self.messages.extend(response.messages)
+                consecutive_failures = 0  # Reset on successful response
 
-                # Check for consensus
-                if any("Consensus: True" in msg.get("content", "") for msg in response.messages if msg):
-                    self._extract_toc(response.messages)
+                if 'Consensus: True' in content:
+                    self._extract_toc(content)
                     irc_logger.success("Consensus reached on the Table of Contents.")
                     break
 
-                if attempt_count >= TOC_GENERATION["max_attempts"]:
-                    irc_logger.warning("Max attempts reached. Forcing consensus.")
-                    self._force_consensus()
-                    break
+                # Switch to the other agent
+                current_agent = self._handoff_to_gustave() if current_agent.name == "Zero" else self._handoff_to_zero()
+            else:
+                irc_logger.warning("Max attempts or consecutive failures reached. Forcing consensus.")
+                self._force_consensus()
 
         except Exception as e:
             irc_logger.error(f"Error during ToC generation: {str(e)}")
@@ -101,31 +120,9 @@ class TableOfContentsGenerator:
             irc_logger.error(f"Traceback: {traceback_str}")
             return None
 
-        if self.toc and self.toc != "No table of contents reached":
+        if self.toc:
             irc_logger.system_message("Final Table of Contents generated successfully.")
         else:
             irc_logger.error("Failed to generate the table of contents.")
 
         return self.toc
-
-    def _extract_toc(self, messages):
-        """Extract the agreed-upon table of contents from messages"""
-        for msg in reversed(messages):
-            if "Table of Contents:" in msg.get("content", ""):
-                self.toc = msg["content"].split("Table of Contents:")[1].strip()
-                return
-
-    def _force_consensus(self):
-        """Force consensus with the last proposed table of contents"""
-        for msg in reversed(self.messages):
-            if "Table of Contents:" in msg.get("content", ""):
-                self.toc = msg["content"].split("Table of Contents:")[1].strip()
-                irc_logger.info("Forced consensus on the last proposed Table of Contents.")
-                return
-        self.toc = "No table of contents reached"
-        irc_logger.warning("No valid Table of Contents found to force consensus.")
-
-    def get_toc(self):
-        """Return the generated table of contents"""
-        return self.toc
-
