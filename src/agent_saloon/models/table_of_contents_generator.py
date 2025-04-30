@@ -101,7 +101,13 @@ class TableOfContentsGenerator:
                     consecutive_failures += 1
                     continue
 
-                last_message = response.messages[-1]
+                # Extract the last assistant message (ignore tool/function call messages)
+                assistant_msgs = [msg for msg in response.messages if msg.get('role') == 'assistant']
+                if not assistant_msgs:
+                    irc_logger.error("No assistant message found in agent response.")
+                    consecutive_failures += 1
+                    continue
+                last_message = assistant_msgs[-1]
                 content = last_message.get('content', '') or ''
                 formatted_content = self.format_message(content)
 
