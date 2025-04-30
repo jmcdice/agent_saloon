@@ -1,9 +1,9 @@
 # src/models/table_of_contents_generator.py
 
-from src.agents import Agents
-from src.prompts import TOC_PROMPT_ZERO, TOC_PROMPT_GUSTAVE
-from src.config import TOC_GENERATION
-from src.utils.irc_logger import irc_logger
+from agent_saloon.agents.agents import Agents
+from agent_saloon.prompts.toc_prompts import TOC_PROMPT_ZERO, TOC_PROMPT_GUSTAVE
+from agent_saloon.config import TOC_GENERATION
+from agent_saloon.utils.irc_logger import irc_logger
 import traceback
 
 class TableOfContentsGenerator:

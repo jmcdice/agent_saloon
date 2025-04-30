@@ -46,9 +46,9 @@ source .venv/bin/activate
 
 2. Run the CLI command:
 ```bash
-agent-saloon --chapters 5 "My Book Topic"
+saloon --chapters 5 "My Book Topic"
 ```
-`agent-saloon` accepts a positional `topic` argument and an optional `--chapters` (or `-c`) flag to set the number of chapters.
+`saloon` accepts a positional `topic` argument and an optional `--chapters` (or `-c`) flag to set the number of chapters.
 
 3. Follow the interactive prompts to generate your book.
 
@@ -56,13 +56,17 @@ agent-saloon --chapters 5 "My Book Topic"
 
 ```
 agent_saloon/
-├── main.py                 # Entry point
-├── requirements.txt        # Dependencies
+├── main.py                 # Shim entry point (imports CLI)
+├── requirements.txt        # Legacy requirements (editable install preferred)
+├── pyproject.toml          # Build configuration & dependencies
 └── src/
-    ├── agents/            # Agent configurations
-    ├── models/            # Book generation logic
-    ├── prompts/           # Agent prompt templates
-    └── utils/             # Utility functions
+    └── agent_saloon/
+        ├── cli.py          # CLI implementation
+        ├── config.py       # Configuration values
+        ├── agents/         # Agent configurations
+        ├── models/         # Book generation logic
+        ├── prompts/        # Agent prompt templates
+        └── utils/          # Utility functions (logging, etc.)
 ```
 
 ## Example Output

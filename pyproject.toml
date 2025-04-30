@@ -17,11 +17,12 @@ dependencies = [
     "swarm @ git+https://github.com/openai/swarm.git"
 ]
 
+
 [tool.setuptools]
-py-modules = ["main"]
+package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [project.scripts]
-agent-saloon = "main:main"
+saloon = "agent_saloon.cli:main"

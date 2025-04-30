@@ -1,9 +1,9 @@
 # src/models/section_writer.py
 
-from src.agents.agents import Agents
-from src.prompts.section_prompts import SECTION_PROMPT_ZERO, SECTION_PROMPT_GUSTAVE
-from src.utils.irc_logger import irc_logger
-from src.config import SECTION_GENERATION  # Ensure you have this config
+from agent_saloon.agents.agents import Agents
+from agent_saloon.prompts.section_prompts import SECTION_PROMPT_ZERO, SECTION_PROMPT_GUSTAVE
+from agent_saloon.utils.irc_logger import irc_logger
+from agent_saloon.config import SECTION_GENERATION
 import traceback
 
 class SectionWriter:

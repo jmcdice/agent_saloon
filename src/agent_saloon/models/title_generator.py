@@ -1,9 +1,9 @@
 # src/models/title_generator.py
 
-from src.agents.agents import Agents
-from src.prompts.title_prompts import ZERO_TITLE_PROMPT, GUSTAVE_TITLE_PROMPT
-from src.config import TITLE_GENERATION
-from src.utils.irc_logger import irc_logger
+from agent_saloon.agents.agents import Agents
+from agent_saloon.prompts.title_prompts import ZERO_TITLE_PROMPT, GUSTAVE_TITLE_PROMPT
+from agent_saloon.config import TITLE_GENERATION
+from agent_saloon.utils.irc_logger import irc_logger
 import traceback
 
 class TitleGenerator:
