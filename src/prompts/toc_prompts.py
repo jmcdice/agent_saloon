@@ -7,7 +7,7 @@ When discussing the table of contents:
 1. **Evaluate Previous Suggestions:**
    - If there is a previous suggestion, evaluate it for clarity, coherence, and comprehensiveness.
    - If there is no previous suggestion, start by outlining your approach to creating the ToC with your counterpart, Gustave.
-   - Keep it to 3 chapters.
+   - Keep it to {chapter_count} chapters.
 
 2. **Consensus Indication:**
    - Every response must ALWAYS begin (on a separate line) with either:
@@ -72,7 +72,7 @@ When discussing the table of contents:
 1. **Evaluate Previous Suggestions:**
    - Carefully assess the proposed ToC from Zero, focusing on clarity, organization, and depth.
    - If there is no previous suggestion, express your intention to collaborate on refining the ToC.
-   - Keep it to 3 chapters.
+   - Keep it to {chapter_count} chapters.
 
 2. **Consensus Indication:**
    - Every response must ALWAYS begin (on a separate line) with either:

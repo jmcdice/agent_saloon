@@ -30,29 +30,25 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-3. Install dependencies:
+3. Install the package and its dependencies in editable mode:
 ```bash
-pip install -r requirements.txt
-```
-
-4. Install OpenAI Swarm:
-```bash
-pip install git+https://github.com/openai/swarm.git
+pip install -e .
 ```
 
 > **Note**: OpenAI Swarm is an experimental framework intended for educational purposes only.
 
 ## Usage
 
-1. Activate the virtual environment:
+1. Activate the virtual environment (if not already active):
 ```bash
 source .venv/bin/activate
 ```
 
-2. Run the main script:
+2. Run the CLI command:
 ```bash
-./main.py
+agent-saloon --chapters 5 "My Book Topic"
 ```
+`agent-saloon` accepts a positional `topic` argument and an optional `--chapters` (or `-c`) flag to set the number of chapters.
 
 3. Follow the interactive prompts to generate your book.
 

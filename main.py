@@ -133,8 +133,25 @@ def compile_final_book(book_manager, title, chapters):
     irc_logger.system_message(f"Final book compiled successfully at {os.path.join(book_manager.create_book_directory(title), final_book_filename)}")
 
 def main():
-    irc_logger.system_message("Enter a book topic:")
-    topic = input().strip()
+    # Parse command-line arguments
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="Generate a book collaboratively with AI agents."
+    )
+    parser.add_argument(
+        '-c', '--chapters',
+        type=int,
+        default=3,
+        help='Number of chapters to generate'
+    )
+    parser.add_argument(
+        'topic',
+        nargs='+',
+        help='Topic for the book'
+    )
+    args = parser.parse_args()
+    topic = ' '.join(args.topic).strip()
+    chapter_count = args.chapters
 
     # Generate title
     title_gen = TitleGenerator(topic)
@@ -156,8 +173,8 @@ def main():
     # Save the book title
     book_manager.write_content(title, "title.txt", title)
 
-    # Generate Table of Contents
-    toc_generator = TableOfContentsGenerator(title)
+    # Generate Table of Contents with specified chapter count
+    toc_generator = TableOfContentsGenerator(title, chapter_count)
     toc = toc_generator.generate()
 
     if toc:

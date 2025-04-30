@@ -7,8 +7,16 @@ from src.utils.irc_logger import irc_logger
 import traceback
 
 class TableOfContentsGenerator:
-    def __init__(self, book_title):
+    def __init__(self, book_title, chapter_count=3):
+        """
+        Initialize ToC generator.
+
+        Args:
+            book_title (str): The title of the book.
+            chapter_count (int): Number of chapters to generate.
+        """
         self.book_title = book_title
+        self.chapter_count = chapter_count or 3
         self.agents = Agents()
         self.messages = []
         self.toc = None
@@ -16,8 +24,11 @@ class TableOfContentsGenerator:
 
     def _setup_agents(self):
         """Initialize the Zero and Gustave agents with ToC-specific prompts"""
-        self.zero_agent = self.agents.get_zero(TOC_PROMPT_ZERO, self._handoff_to_gustave)
-        self.gustave_agent = self.agents.get_gustave(TOC_PROMPT_GUSTAVE, self._handoff_to_zero)
+        # Format prompts with dynamic chapter count
+        zero_prompt = TOC_PROMPT_ZERO.format(chapter_count=self.chapter_count)
+        gustave_prompt = TOC_PROMPT_GUSTAVE.format(chapter_count=self.chapter_count)
+        self.zero_agent = self.agents.get_zero(zero_prompt, self._handoff_to_gustave)
+        self.gustave_agent = self.agents.get_gustave(gustave_prompt, self._handoff_to_zero)
 
     def _handoff_to_gustave(self):
         return self.gustave_agent
